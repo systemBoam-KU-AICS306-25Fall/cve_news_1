@@ -1,0 +1,31 @@
+<script>
+    let originalNewsData = []; 
+
+    async function loadCveNews() {
+        const res = await fetch("http://localhost:5566/api/cve-news");
+        const data = await res.json();
+
+        // 🔥 혼합 점수 계산 로직
+        const scoredNews = data.news.map(item => {
+            const publishedDate = new Date(item.published);
+            const today = new Date();
+            
+            const diffDays =
+                (today - publishedDate) / (1000 * 60 * 60 * 24); // 날짜 차이
+
+            const dateScore = 1 / (diffDays + 1);   // 최근일수록 높은 점수
+            const cveScore = item.cves.length;      // CVE 개수 점수
+
+            const mixScore = dateScore * 0.7 + cveScore * 0.3;
+
+            return { ...item, score: mixScore };
+        });
+
+        // 🔥 혼합 점수 TOP 5 선택
+        originalNewsData = scoredNews
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5);
+
+        renderNews(originalNewsData);
+    }
+</script>
