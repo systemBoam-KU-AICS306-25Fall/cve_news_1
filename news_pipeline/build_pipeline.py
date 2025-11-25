@@ -30,4 +30,27 @@ def build_news_pipeline(max_articles_per_feed=5):
         }
         final_results.append(item)
 
+    # 6) 최근 트렌드 점수 계산
+
+    seven_days_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+
+    def parse_date(pub):
+        try:
+            return datetime.datetime.strptime(pub, "%a, %d %b %Y %H:%M:%S %Z")
+        except:
+            return datetime.datetime(2000, 1, 1)
+
+    recent_cves = []
+    for news in final_results:
+        pub_date = parse_date(news["published"])
+        if pub_date >= seven_days_ago:
+            recent_cves.extend(news["cves"])
+
+    cve_week_freq = Counter(recent_cves)
+
+    for news in final_results:
+        trend_score = sum(cve_week_freq[cve] for cve in news["cves"])
+        news["trend_score"] = trend_score
+
+
     return final_results
