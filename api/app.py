@@ -5,7 +5,7 @@ import os
 # news_pipeline 폴더 경로 추가
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "news_pipeline"))
 
-from build_pipeline import build_news_pipeline
+from news_pipeline.build_pipeline import build_news_pipeline
 
 app = Flask(__name__)
 
